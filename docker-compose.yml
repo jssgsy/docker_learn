@@ -1,0 +1,21 @@
+version: "3.7"
+services:
+  docker_learn:
+    # 使用当前目录下的Dockerfile来构建image
+    build: ./
+    container_name: docker_learn_container
+    ports:
+    - 9000:9000
+    # 用来远程debug
+    - 5005:5005
+    volumes:
+      # 经验证，可以使用环境变量
+      - ${HOME}/.m2:/root/.m2
+      # 能不能做到与.dockerignore一样的效果排除部分文件？如target其实是不需要的
+      # 但好像必要性不大
+      - ./:/data
+    # 使用当前目录下的settings.xml文件
+    # 线上环境不要使用spring-boot:run的方式运行，容易出各种问题，还是生成jar包直接运行即可
+    command: ["mvn", "-s", "settings.xml", "clean", "spring-boot:run"]
+
+
