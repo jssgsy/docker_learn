@@ -1,0 +1,18 @@
+# 适用于线上环境：使用多阶段构建，只将最终的jar包复制到镜像中(线上环境中)
+FROM maven:3.5-jdk-8-slim
+RUN mkdir /data
+WORKDIR /data
+COPY ./ /data
+
+# 使用当前目录下的settings.xml文件
+RUN mvn -s settings.xml clean package
+
+# 这里依赖了打包生成的jar，即依赖了版本，应该指定生成的jar包名字
+#CMD ["java", "-jar", "/data/target/docker_learn-1.0-SNAPSHOT.jar"]
+
+# 只引入最小依赖jre
+FROM anapsix/alpine-java:8_server-jre_unlimited
+RUN mkdir /app
+WORKDIR /app
+COPY --from=0 /data/target/docker_learn-1.0-SNAPSHOT.jar .
+CMD ["java", "-jar", "/app/docker_learn-1.0-SNAPSHOT.jar"]
